@@ -4,7 +4,13 @@ Renders an increasing number of bunny sprites until a stable 60fps is hit.  This
 
 ## Disclaimer
 
-It is important to note that C#/Mono and GDNative are both very young.  Its possible that their performance characteristics will change.  Additionally, these are just a few benchmarks testing a few use cases.  Please don't use them to say "Language X is better / faster than Language Y", we don't have enough data to make those assertions.  If anything this proves that any of the choices below are viable.  Choose the language that you are comfortable with and do your own testing to cover your own scenarios.
+The performance differences here might appear significant, but these benchmarks test the limits of each language (and the engine), which most games will never hit.  Do not pick a language because it is "fastest" unless you know you need the fastest language.  The smarter choice would be to pick the language you are most productive in.  I personally think that most people will be more productive in GDScript or C#.  A lot of time and energy went into making GDScript an integrated, seamless experience so it is a good starting point if you don't have a preference for any of the other languages listed.
+
+It is also important to note that C#/Mono and GDNative are both very young.  Its possible that their performance characteristics will change.  And please don't use these benchmarks to say "Language X is better / faster than Language Y", we don't have enough data to make those assertions.  If anything this proves that any of the choices below are viable.  Choose the language that you are comfortable with and do your own testing to cover your own scenarios.
+
+## Updates
+
+Follow me on twitter [@cart_cart](https://twitter.com/cart_cart) if you want Bunnymark updates or updates on my other projects!
 
 ## Running
 
@@ -13,19 +19,19 @@ It is important to note that C#/Mono and GDNative are both very young.  Its poss
     * run ```make``` in the root of this project
 * Build C# files
     * run ```msbuild /p:Configuration=Tools;DebugSymbols=false;Optimize=true``` (some terminals might require escaping some of those symbols)
-* Build nim files
+* Build Nim files
     * Setup headers and bindings using [these directions](https://pragmagic.github.io/godot-nim/master/index.html)
     * run ```nake build```
 * Build D files
     * `git clone` [godot-d](https://github.com/GodotNativeTools/godot-d) to your favorite directory
-    * [generate the buildings](https://github.com/GodotNativeTools/godot-d/blob/master/generator/README.md)
+    * [generate the bindings](https://github.com/GodotNativeTools/godot-d/blob/master/generator/README.md)
     * run `dub add-local /path/to/godot-d/`
     * run `dub build -b release`
 * run ```sh run_benchmarks.sh```
 * wait!  This will take some time ... the automation code is still a bit naive so it takes awhile to converge on 60 fps
 * view the results in ```USER_HOME_DIRECTORY/.godot/app_userdata/Bunnymark/benchmark_results.json```
 
-## Latest Run - October 29, 2017
+## Benchmark Run - February 22, 2018
 
 ### BunnymarkV2
 
@@ -33,10 +39,11 @@ Attempts to draw as many sprites as possible using Sprite nodes.  It calls GetCh
 
 | Language           | Bunnies Rendered |
 |--------------------|------------------|
-| GDScript (Release) | 12120            |
-| C#/Mono            | 15620            |
-| GDNative (Nim)     | 23900            |
-| GDNative (C++)     | 29560            |
+| GDScript (Release) | 12660            |
+| C#/Mono            | 17236            |
+| GDNative (D)       | 22620            |
+| GDNative (Nim)     | 24315            |
+| GDNative (C++)     | 31738            |
 
 ### BunnymarkV1 - DrawTexture
 
@@ -44,10 +51,11 @@ Attempts to draw as many sprites to the screen as possible by drawing textures d
 
 | Language           | Bunnies Rendered |
 |--------------------|------------------|
-| GDScript (Release) | 13620            |
-| C#/Mono            | 50100            |
-| GDNative (Nim)     | 53700            |
-| GDNative (C++)     | 58140            
+| GDScript (Release) | 14458            |
+| C#/Mono            | 51718            |
+| GDNative (Nim)     | 56123            |
+| GDNative (D)       | 58060            |
+| GDNative (C++)     | 60120            |
 
 ### BunnymarkV1 - Sprites
 
@@ -55,10 +63,11 @@ Attempts to draw as many sprites to the screen as possible by adding Sprite node
 
 | Language           | Bunnies Rendered |
 |--------------------|------------------|
-| GDScript (Release) | 11540            |
-| C#/Mono            | 19900            |
-| GDNative (Nim)     | 28180            |
-| GDNative (C++)     | 31360            |
+| GDScript (Release) | 12279            |
+| C#/Mono            | 23279            |
+| GDNative (Nim)     | 30479            |
+| GDNative (D)       | 30636            |
+| GDNative (C++)     | 34174            |
 
 ### Hardware:
 
@@ -68,19 +77,10 @@ Attempts to draw as many sprites to the screen as possible by adding Sprite node
 
 ### Build Info:
 * OS: Arch Linux
-* Compiler: gcc 7.2.0
-* Build Command: ```scons p=x11 target=release_debug tools=yes builtin_openssl=yes module_mono_enabled=yes -j4 -use_lto=yes```
-* Godot Commit: [619e4eb23df037d152bf7776c5447d46293aadff](https://github.com/godotengine/godot/commit/619e4eb23df037d152bf7776c5447d46293aadff)
-
-### Remarks
-
-* The tests have changed since the first run so we shouldn't make direct comparisons to those numbers
-* This is the first test with Nim implementations.  It is only a bit slower than the c++ tests but its much easier to use.  Very promising!
-* The tests are now fully automated.  No more mindless clicking!
-* The test harness is currently written in GDScript.  It does things like test loading, measuring, adding/removing bunnies, etc. This probably results in a marginal performance hit, but it should be consistent across all languages so I think thats fairer (and less work) than implementing it in each language.
-* This run was the first to use the appropriate optimizations for each test.  Godot was built in release with link time optimization, no tools (except mono, which needs it afaik), mono was built without debug symbols and with optimizations, nim used -d:release and --opt:speed, c++ used -O3
+* Official Godot 3.0 release
 
 ## Credits
 
-* GDScript example adapted from: https://github.com/curly-brace/godot-bunnies.  Thanks @curly-brace!
-* @Capital-EX provided the initial Nim tests and the display server tests
+* GDScript example adapted from: https://github.com/curly-brace/godot-bunnies.  Thanks [@curly-brace](https://github.com/curly-brace)!
+* [@Capital-EX](https://github.com/Capital-EX) provided the initial Nim tests, the D tests, and the display server tests
+* [@endragor](https://github.com/endragor) updated the GDNative tests to work with Godot 3.0 stable

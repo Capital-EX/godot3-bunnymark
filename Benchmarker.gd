@@ -8,6 +8,8 @@ var benchmark_node = null
 var output_path = "user://benchmark_results.json"
 var benchmark = null
 var language = null
+var arg_bench = "--bench="
+var arg_lang = "--lang="
 
 # bunnymark
 var bunnymark_target = 60.0
@@ -28,16 +30,16 @@ func _ready():
 	set_process(false)
 	fps_label = get_node("Panel/FPS")
 	benchmark_container = get_node("BenchmarkContainer")
-	var args = OS.get_cmdline_args()
+
 	benchmark = "BunnymarkV2"
 	language = "gd"
-	if args.size() >= 1:
-		benchmark = args[0].substr(1, args[0].length() - 1)
-	if args.size() >= 2:
-		language = args[1].substr(1, args[1].length() - 1)
 
-	match language:
-		"dlang": language = "d"
+	var args = OS.get_cmdline_args()
+	for arg in args:
+		if arg.substr(0, arg_bench.length()) == arg_bench:
+			benchmark = arg.split("=")[1]
+		elif arg.substr(0, arg_lang.length()) == arg_lang:
+			language = arg.split("=")[1]
 
 	start_benchmark(benchmark, language)
 
@@ -62,8 +64,11 @@ func start_benchmark(benchmark_name, language):
 	benchmark_node.add_user_signal("benchmark_finished", ["output"])
 	benchmark_node.connect("benchmark_finished", self, "benchmark_finished")
 	benchmark_container.add_child(benchmark_node)
-	set_process(true)
-	
+	if benchmark_node.has_method("add_bunny"):
+		set_process(true)
+	else:
+		benchmark_finished(0)
+
 func benchmark_finished(output):
 	print("benchmark output: ", output)
 	benchmark_container.remove_child(benchmark_node)
@@ -71,6 +76,7 @@ func benchmark_finished(output):
 	get_tree().quit()
 
 func write_result(output):
+	print("written ", output)
 	var file = File.new()
 	file.open(output_path, File.READ)
 	var parse_result = JSON.parse(file.get_as_text())
@@ -97,9 +103,9 @@ func update_bunnymark(delta):
 		var difference = fps - bunnymark_target
 		var bunny_difference = 0
 		if difference > bunnymark_target_error:
-			bunny_difference = min(1000, max(1, difference*floor(20 * difference)))
+			bunny_difference = min(1000, max(1, floor(20 * difference)))
 		elif difference < -bunnymark_target_error:
-			bunny_difference = max(-1000, min(-1, -1*difference*ceil(20 * difference)))
+			bunny_difference = max(-1000, min(-1, -1*ceil(20 * difference)))
 		if abs(difference) < bunnymark_target_error:
 			stable_updates += 1
 			if stable_updates == stable_updates_required:
